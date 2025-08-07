@@ -39,34 +39,50 @@ const clients = new Map();
 const adminConnections = new Set();
 
 wss.on('connection', (ws, req) => {
-  // Check if this is an admin connection (from web interface)
-  // Admin connections come from the browser with an origin header
-  const isAdmin = req.headers.origin && req.headers.origin.includes('localhost:8080');
+  // Don't assume connection type yet - wait for identification
+  ws.pendingIdentification = true;
   
-  if (isAdmin) {
-    adminConnections.add(ws);
-    ws.isAdmin = true;
-    console.log('Admin connected');
-  } else {
-    const clientId = Date.now().toString(36) + Math.random().toString(36).substr(2);
-    ws.clientId = clientId;
-    clients.set(clientId, ws);
-  
-    db.run('INSERT OR REPLACE INTO clients (client_id, name, status) VALUES (?, ?, ?)', 
-      [clientId, `Client-${clientId.substr(0, 6)}`, 'online']);
+  // Set a timeout for identification
+  const identificationTimeout = setTimeout(() => {
+    if (ws.pendingIdentification) {
+      // No identification received, treat as client
+      const clientId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      ws.clientId = clientId;
+      ws.pendingIdentification = false;
+      clients.set(clientId, ws);
     
-    ws.send(JSON.stringify({
-      type: 'connection',
-      clientId: clientId,
-      message: 'Connected to server'
-    }));
-  }
+      db.run('INSERT OR REPLACE INTO clients (client_id, name, status) VALUES (?, ?, ?)', 
+        [clientId, `Client-${clientId.substr(0, 6)}`, 'online']);
+      
+      ws.send(JSON.stringify({
+        type: 'connection',
+        clientId: clientId,
+        message: 'Connected to server'
+      }));
+      
+      broadcastClientList();
+    }
+  }, 1000); // Wait 1 second for identification
   
-  broadcastClientList();
+  ws.identificationTimeout = identificationTimeout;
   
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
+      
+      // Handle identification message
+      if (data.type === 'identify' && ws.pendingIdentification) {
+        clearTimeout(ws.identificationTimeout);
+        ws.pendingIdentification = false;
+        
+        if (data.role === 'admin') {
+          adminConnections.add(ws);
+          ws.isAdmin = true;
+          console.log('Admin identified and connected');
+          broadcastClientList();
+        }
+        return;
+      }
       
       if (data.type === 'message' && !ws.isAdmin) {
         db.run('INSERT INTO messages (client_id, sender, message) VALUES (?, ?, ?)',
@@ -92,6 +108,11 @@ wss.on('connection', (ws, req) => {
   });
   
   ws.on('close', () => {
+    // Clear identification timeout if still pending
+    if (ws.identificationTimeout) {
+      clearTimeout(ws.identificationTimeout);
+    }
+    
     if (ws.isAdmin) {
       adminConnections.delete(ws);
       console.log('Admin disconnected');

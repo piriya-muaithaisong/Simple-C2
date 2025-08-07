@@ -13,6 +13,11 @@ function App() {
     
     ws.current.onopen = () => {
       console.log('Connected to WebSocket');
+      // Identify as admin
+      ws.current.send(JSON.stringify({
+        type: 'identify',
+        role: 'admin'
+      }));
     };
     
     ws.current.onmessage = (event) => {
