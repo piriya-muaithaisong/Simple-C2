@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  server:
+    build: ./server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server/chat.db:/app/chat.db
+      - admin-build:/app/admin-frontend/build
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+    depends_on:
+      - admin-builder
+    restart: unless-stopped
+
+  admin-builder:
+    build: ./admin-frontend
+    command: npm run build
+    volumes:
+      - admin-build:/app/build
+
+volumes:
+  admin-build:

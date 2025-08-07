@@ -1,0 +1,43 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "chat-cli": "./chat-cli.js"
+  },
+  "scripts": {
+    "build": "npx pkg client-standalone.js --targets node18-linux-x64 --output dist/chat-client",
+    "build:win": "npx pkg client-standalone.js --targets node18-win-x64 --output dist/chat-client.exe",
+    "build:mac": "npx pkg client-standalone.js --targets node18-macos-x64 --output dist/chat-client-mac",
+    "build:all": "npm run build && npm run build:win && npm run build:mac",
+    "build:silent": "npx pkg client-headless.js --targets node18-linux-x64 --output dist/chat-client-silent",
+    "build:silent:win": "npx pkg client-headless.js --targets node18-win-x64 --output dist/chat-client-silent.exe --options \"--win-hide\"",
+    "build:silent:all": "npm run build:silent && npm run build:silent:win",
+    "build:windows:silent": "node build-silent-windows.js",
+    "build:installer": "npx pkg client-installer.js --targets node18-win-x64 --output dist/client-installer.exe",
+    "build:installer:lite": "npx pkg client-installer-lite.js --targets node18-win-x64 --output dist/installer-lite.exe",
+    "build:single": "npx pkg single-installer.js --targets node18-win-x64 --output dist/install.exe"
+  },
+  "pkg": {
+    "scripts": [
+      "client-standalone.js"
+    ],
+    "targets": [
+      "node18-linux-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^14.0.0",
+    "readline-sync": "^1.4.10",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

@@ -1,0 +1,39 @@
+# Node modules
+node_modules/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+chat.db
+
+# Log files
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Build outputs
+build/
+dist/
+
+# Claude AI files
+CLAUDE.md
+.claude/
+claude-*
+*claude*
+*.claude

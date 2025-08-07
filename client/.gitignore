@@ -1,0 +1,41 @@
+# Build outputs and executables
+dist/
+*.exe
+*.zip
+*.tar.gz
+
+# Node modules
+node_modules/
+
+# Log files
+*.log
+installer-debug.log
+
+# Temporary files
+*.tmp
+*.temp
+*.vbs
+*.bat
+
+# Package files
+pkg-config.json
+
+# Test files
+test-*
+debug-*
+fixed-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Claude AI files
+CLAUDE.md
+.claude/
+claude-*
+*claude*
+*.claude
